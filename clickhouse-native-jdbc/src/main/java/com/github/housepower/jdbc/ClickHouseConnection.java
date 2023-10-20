@@ -163,6 +163,7 @@ public class ClickHouseConnection implements SQLConnection {
         return new ClickHouseStatement(this, nativeCtx);
     }
 
+    // 就是直接返回ClickHousePreparedInsertStatement(insert)或者ClickHousePreparedQueryStatement(query)
     @Override
     public PreparedStatement prepareStatement(String query) throws SQLException {
         Validate.isTrue(!isClosed(), "Unable to create PreparedStatement, because the connection is closed.");
@@ -270,9 +271,11 @@ public class ClickHouseConnection implements SQLConnection {
 
     public Block getSampleBlock(final String insertQuery) throws SQLException {
         NativeClient nativeClient = getHealthyNativeClient();
+        // 发送QueryRequest请求
         nativeClient.sendQuery(insertQuery, nativeCtx.clientCtx(), cfg.get().settings());
         Validate.isTrue(this.state.compareAndSet(SessionState.IDLE, SessionState.WAITING_INSERT),
                 "Connection is currently waiting for an insert operation, check your previous InsertStatement.");
+        // 根据返回的DataResponse构造block
         return nativeClient.receiveSampleBlock(cfg.get().queryTimeout(), nativeCtx.serverCtx());
     }
 

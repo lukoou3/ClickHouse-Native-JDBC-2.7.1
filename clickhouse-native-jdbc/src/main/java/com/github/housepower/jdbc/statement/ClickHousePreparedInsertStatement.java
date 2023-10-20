@@ -103,12 +103,12 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
                                              ClickHouseConnection conn,
                                              NativeContext nativeContext) throws SQLException {
         super(conn, nativeContext, null);
-        this.blockInit = false;
+        this.blockInit = false; // block是否初始化
         this.posOfData = posOfData;
         this.fullQuery = fullQuery;
         this.insertQuery = fullQuery.substring(0, posOfData);
 
-        initBlockIfPossible();
+        initBlockIfPossible(); // 初始化block
     }
 
     // paramPosition start with 1
@@ -199,11 +199,19 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
         return sb.toString();
     }
 
+    /**
+     * 初始化block，每次插入只初始化一次；executeBatch发送完数据，blockInit重置为false，下次调用setObject会重新检查初始化block
+     * 初始化block：就是给服务端发送QueryRequest请求，根据返回的DataResponse构造block。这是ck官方定义的通信协议，类似kafka也有类似的协议，只要按照协议，任何语言都可以编写ck客户端。
+     * 官方tcp客户端通信协议文档：
+     *    https://clickhouse.com/docs/en/native-protocol/client
+     *    https://clickhouse.com/docs/en/native-protocol/server
+     */
     private void initBlockIfPossible() throws SQLException {
         if (this.blockInit) {
             return;
         }
         ExceptionUtil.rethrowSQLException(() -> {
+            // 发送QueryRequest请求，根据返回的DataResponse构造block
             this.block = connection.getSampleBlock(insertQuery);
             this.block.initWriteBuffer();
             this.blockInit = true;

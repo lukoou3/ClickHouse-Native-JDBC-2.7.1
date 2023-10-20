@@ -23,9 +23,18 @@ import java.sql.SQLException;
 
 public class DataResponse implements Response {
 
+    /**
+     * | field   | type      | description        |
+     * | ------- | --------- | ------------------ |
+     * | info    | BlockInfo | Encoded block info |
+     * | columns | UVarInt   | Columns count      |
+     * | rows    | UVarInt   | Rows count         |
+     * | columns | Column    | Columns with data  |
+     *
+     */
     public static DataResponse readFrom(
             BinaryDeserializer deserializer, NativeContext.ServerContext info) throws IOException, SQLException {
-
+        // 这个官网文档上怎么没有
         String name = deserializer.readUTF8StringBinary();
 
         deserializer.maybeEnableCompressed();

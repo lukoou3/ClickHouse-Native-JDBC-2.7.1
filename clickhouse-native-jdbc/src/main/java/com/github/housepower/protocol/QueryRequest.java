@@ -65,11 +65,25 @@ public class QueryRequest implements Request {
         return ProtoType.REQUEST_QUERY;
     }
 
+    /**
+     * https://clickhouse.com/docs/en/native-protocol/client#query
+     * | field       | type       | value      | description               |
+     * | ----------- | ---------- | ---------- | ------------------------- |
+     * | query_id    | String     | `1ff-a123` | Query ID, can be UUIDv4   |
+     * | client_info | ClientInfo | See type   | Data about client         |
+     * | settings    | Settings   | See type   | List of settings          |
+     * | secret      | String     | `secret`   | Inter-server secret       |
+     * | stage       | UVarInt    | `2`        | Execute until query stage |
+     * | compression | UVarInt    | `0`        | Disabled=0, enabled=1     |
+     * | body        | String     | `SELECT 1` | Query text                |
+     *
+     */
     @Override
     public void writeImpl(BinarySerializer serializer) throws IOException, SQLException {
-        serializer.writeUTF8StringBinary(queryId);
-        clientContext.writeTo(serializer);
+        serializer.writeUTF8StringBinary(queryId); // query_id: String
+        clientContext.writeTo(serializer); // client_info: ClientInfo
 
+        // settings: Settings
         for (Map.Entry<SettingKey, Serializable> entry : settings.entrySet()) {
             serializer.writeUTF8StringBinary(entry.getKey().name());
             @SuppressWarnings("rawtypes")
@@ -77,12 +91,12 @@ public class QueryRequest implements Request {
             //noinspection unchecked
             type.serializeSetting(serializer, entry.getValue());
         }
-        serializer.writeUTF8StringBinary("");
-        serializer.writeVarInt(stage);
-        serializer.writeBoolean(compression);
-        serializer.writeUTF8StringBinary(queryString);
+        serializer.writeUTF8StringBinary(""); // secret: String
+        serializer.writeVarInt(stage); // stage: UVarInt, 固定是2
+        serializer.writeBoolean(compression); // compression: UVarInt, 固定是1
+        serializer.writeUTF8StringBinary(queryString); // body: String
         // empty data to server
-        DataRequest.EMPTY.writeTo(serializer);
+        DataRequest.EMPTY.writeTo(serializer); // 这里为啥写入一个empty DataRequest
 
     }
 }

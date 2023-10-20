@@ -26,10 +26,12 @@ public interface Response {
     ProtoType type();
 
     static Response readFrom(BinaryDeserializer deserializer, NativeContext.ServerContext info) throws IOException, SQLException {
+        // 返回Response类型, 枚举定义在：https://clickhouse.com/docs/en/native-protocol/server
         switch ((int) deserializer.readVarInt()) {
             case 0:
                 return HelloResponse.readFrom(deserializer);
             case 1:
+                // insert into初始化、select column from table时, 返回DataResponse
                 return DataResponse.readFrom(deserializer, info);
             case 2:
                 throw ExceptionResponse.readExceptionFrom(deserializer);

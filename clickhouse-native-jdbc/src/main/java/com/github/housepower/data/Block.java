@@ -27,6 +27,15 @@ import java.util.Map;
 
 public class Block {
 
+    /**
+     * | field   | type      | description        |
+     * | ------- | --------- | ------------------ |
+     * | info    | BlockInfo | Encoded block info |
+     * | columns | UVarInt   | Columns count      |
+     * | rows    | UVarInt   | Rows count         |
+     * | columns | Column    | Columns with data  |
+     *
+     */
     public static Block readFrom(BinaryDeserializer deserializer,
                                  NativeContext.ServerContext serverContext) throws IOException, SQLException {
         BlockSettings info = BlockSettings.readFrom(deserializer);
@@ -37,10 +46,12 @@ public class Block {
         IColumn[] columns = new IColumn[columnCnt];
 
         for (int i = 0; i < columnCnt; i++) {
+            // Column(name, type, bytes data)
             String name = deserializer.readUTF8StringBinary();
             String type = deserializer.readUTF8StringBinary();
 
             IDataType dataType = DataTypeFactory.get(type, serverContext);
+            // 查询是才会有数据，inset into初始化编译时为空
             Object[] arr = dataType.deserializeBinaryBulk(rowCnt, deserializer);
             columns[i] = ColumnFactory.createColumn(name, dataType, arr);
         }

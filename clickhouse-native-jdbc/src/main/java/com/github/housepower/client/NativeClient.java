@@ -205,6 +205,7 @@ public class NativeClient {
     private Response receiveResponse(Duration soTimeout, NativeContext.ServerContext info) throws SQLException {
         try {
             socket.setSoTimeout(((int) soTimeout.toMillis()));
+            // 反序列化Response
             Response response = Response.readFrom(deserializer, info);
             LOG.trace("recv response: {}", response.type());
             return response;
