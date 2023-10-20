@@ -23,10 +23,15 @@ import java.sql.*;
 import java.util.Map;
 import java.util.Properties;
 
+/**
+ * jdbc driver: implements java.sql.Driver 实现规范即可
+ *
+ */
 public class ClickHouseDriver implements Driver {
 
     static {
         try {
+            // 注册driver
             DriverManager.registerDriver(new ClickHouseDriver());
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -35,6 +40,7 @@ public class ClickHouseDriver implements Driver {
 
     @Override
     public boolean acceptsURL(String url) throws SQLException {
+        // startsWith "jdbc:clickhouse:"
         return url.startsWith(ClickhouseJdbcUrlParser.JDBC_CLICKHOUSE_PREFIX);
     }
 
@@ -44,10 +50,12 @@ public class ClickHouseDriver implements Driver {
             return null;
         }
 
+        // 构造cfg
         ClickHouseConfig cfg = ClickHouseConfig.Builder.builder()
-                .withJdbcUrl(url)
-                .withProperties(properties)
+                .withJdbcUrl(url) // 解析出url里的settings
+                .withProperties(properties) // 合并properties里的settings
                 .build();
+        // 返回ClickHouseConnection
         return connect(url, cfg);
     }
 
@@ -91,6 +99,7 @@ public class ClickHouseDriver implements Driver {
 
     @Override
     public boolean jdbcCompliant() {
+        // 是否符合JDBC规范
         return false;
     }
 

@@ -208,6 +208,7 @@ public class ClickHouseConnection implements SQLConnection {
         return new ClickHouseStruct(typeName, attributes);
     }
 
+    // 连接是否还能正常访问
     @Override
     public boolean isValid(int timeout) throws SQLException {
         return getNativeClient().ping(Duration.ofSeconds(timeout), nativeCtx.serverCtx());
@@ -318,9 +319,13 @@ public class ClickHouseConnection implements SQLConnection {
         return new ClickHouseConnection(configure, createNativeContext(configure));
     }
 
+    // 创建实际连接的客户端
     private static NativeContext createNativeContext(ClickHouseConfig configure) throws SQLException {
         if (configure.hosts().size() == 1) {
+            // socket连接, 正常的tcp socket连接
             NativeClient nativeClient = NativeClient.connect(configure);
+            // 传入ClientContext, ServerContext, NativeClient
+            // ServerContext：发送HelloRequest，返回HelloResponse获取服务端版本，时区配置
             return new NativeContext(clientContext(nativeClient, configure), serverContext(nativeClient, configure), nativeClient);
         }
 

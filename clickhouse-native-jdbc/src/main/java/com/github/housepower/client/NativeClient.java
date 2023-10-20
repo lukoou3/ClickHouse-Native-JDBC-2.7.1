@@ -68,15 +68,15 @@ public class NativeClient {
             } else {
                 socket = new Socket();
             }
-            socket.setTcpNoDelay(true);
-            socket.setSendBufferSize(ClickHouseDefines.SOCKET_SEND_BUFFER_BYTES);
-            socket.setReceiveBufferSize(ClickHouseDefines.SOCKET_RECV_BUFFER_BYTES);
-            socket.setKeepAlive(config.tcpKeepAlive());
-            socket.connect(endpoint, (int) config.connectTimeout().toMillis());
+            socket.setTcpNoDelay(true); // 禁止使用 Nagle 算法
+            socket.setSendBufferSize(ClickHouseDefines.SOCKET_SEND_BUFFER_BYTES); // 1Mb
+            socket.setReceiveBufferSize(ClickHouseDefines.SOCKET_RECV_BUFFER_BYTES); // 1Mb
+            socket.setKeepAlive(config.tcpKeepAlive()); // tcp_keep_alive, 默认是false
+            socket.connect(endpoint, (int) config.connectTimeout().toMillis()); // 连接到ck服务端
 
             if (useSSL) ((SSLSocket) socket).startHandshake();
 
-            return new NativeClient(socket);
+            return new NativeClient(socket); // 构造函数里就传入了这一个socket
         } catch (IOException |
                  NoSuchAlgorithmException |
                  KeyStoreException |
@@ -96,8 +96,9 @@ public class NativeClient {
     private NativeClient(Socket socket) throws IOException {
         this.socket = socket;
         this.address = socket.getLocalSocketAddress();
-        this.compression = ClickHouseDefines.COMPRESSION;
+        this.compression = ClickHouseDefines.COMPRESSION; // 写入和读取都启用压缩
 
+        // 包装socket写入/读取流，支持压缩
         this.serializer = new BinarySerializer(new SocketBuffedWriter(socket), compression);
         this.deserializer = new BinaryDeserializer(new SocketBuffedReader(socket), compression);
     }
