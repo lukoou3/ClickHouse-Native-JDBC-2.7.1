@@ -140,15 +140,23 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
         return null;
     }
 
+    /**
+     * setObject方法调用设置一行数据后，调用addBatch把一行数据写入block，就是根据类型写入Column的buffer
+     * 最后调用executeBatch()把一批数据发送到服务端
+     */
     @Override
     public void addBatch() throws SQLException {
-        addParameters();
+        addParameters(); // 把一行数据写入block
     }
 
     @Override
     public void clearBatch() throws SQLException {
     }
 
+    /**
+     * 把一批数据发送到服务端, 发送DataRequest请求
+     *
+     */
     @Override
     public int[] executeBatch() throws SQLException {
         int rows = connection.sendInsertRequest(block);

@@ -103,7 +103,7 @@ public class Block {
         int i = 0;
         try {
             for (; i < columns.length; i++) {
-                columns[i].write(rowData[i]);
+                columns[i].write(rowData[i]); // 就是根据类型写入Column的buffer
             }
             rowCnt++;
         } catch (IOException | ClassCastException e) {
@@ -125,6 +125,16 @@ public class Block {
         }
     }
 
+    /**
+     * https://clickhouse.com/docs/en/native-protocol/client#data
+     *
+     * | field   | type      | description        |
+     * | ------- | --------- | ------------------ |
+     * | info    | BlockInfo | Encoded block info |
+     * | columns | UVarInt   | Columns count      |
+     * | rows    | UVarInt   | Rows count         |
+     * | columns | []Column] | Columns with data  |
+     */
     public void writeTo(BinarySerializer serializer) throws IOException, SQLException {
         settings.writeTo(serializer);
 

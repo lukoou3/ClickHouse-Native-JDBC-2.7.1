@@ -289,6 +289,10 @@ public class ClickHouseConnection implements SQLConnection {
     // when sendInsertRequest we must ensure the connection is healthy
     // the #getSampleBlock() must be called before this method
 
+    /**
+     * 发送DataRequest请求, DataRequest里包含block，就是直接把block发送到socket
+     *
+     */
     public int sendInsertRequest(Block block) throws SQLException {
         Validate.isTrue(this.state.get() == SessionState.WAITING_INSERT, "Call getSampleBlock before insert.");
         try {
