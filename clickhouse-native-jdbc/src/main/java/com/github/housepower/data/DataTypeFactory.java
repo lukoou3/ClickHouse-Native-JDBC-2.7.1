@@ -44,6 +44,10 @@ import com.github.housepower.settings.ClickHouseDefines;
 public class DataTypeFactory {
     private static final LRUCache<String, IDataType<?, ?>> DATA_TYPE_CACHE = new LRUCache<>(ClickHouseDefines.DATA_TYPE_CACHE_SIZE);
 
+    static {
+        DATA_TYPE_CACHE.put("AggregateFunction(uniqCombined64State(12), String)", new DataTypeStringUniqCombined64Aggregate());
+    }
+
     public static IDataType<?, ?> get(String type, NativeContext.ServerContext serverContext) throws SQLException {
         IDataType<?, ?> dataType = DATA_TYPE_CACHE.get(type);
         if (dataType != null) {
