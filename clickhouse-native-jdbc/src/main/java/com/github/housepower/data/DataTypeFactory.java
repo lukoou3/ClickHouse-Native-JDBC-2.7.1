@@ -45,7 +45,8 @@ public class DataTypeFactory {
     private static final LRUCache<String, IDataType<?, ?>> DATA_TYPE_CACHE = new LRUCache<>(ClickHouseDefines.DATA_TYPE_CACHE_SIZE);
 
     static {
-        DATA_TYPE_CACHE.put("AggregateFunction(uniqCombined64State(12), String)", new DataTypeStringUniqCombined64Aggregate());
+        DATA_TYPE_CACHE.put("AggregateFunction(uniqCombined64State(12), String)", new DataTypeUniqCombined64Aggregate());
+        DATA_TYPE_CACHE.put("AggregateFunction(quantileTDigest, Int64)", new DataTypeQuantileTDigestAggregate());
     }
 
     public static IDataType<?, ?> get(String type, NativeContext.ServerContext serverContext) throws SQLException {

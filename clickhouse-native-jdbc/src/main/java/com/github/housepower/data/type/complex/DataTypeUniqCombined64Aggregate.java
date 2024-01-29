@@ -9,11 +9,11 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Types;
 
-public class DataTypeStringUniqCombined64Aggregate implements IDataType<byte[], byte[]> {
+public class DataTypeUniqCombined64Aggregate implements IDataType<byte[], byte[]> {
 
-    public static DataTypeCreator<byte[], byte[]> CREATOR = (lexer, serverContext) -> new DataTypeStringUniqCombined64Aggregate();
+    public static DataTypeCreator<byte[], byte[]> CREATOR = (lexer, serverContext) -> new DataTypeUniqCombined64Aggregate();
 
-    public DataTypeStringUniqCombined64Aggregate() {
+    public DataTypeUniqCombined64Aggregate() {
     }
 
     @Override
